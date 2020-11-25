@@ -145,4 +145,6 @@ int main(void) {
 
 This same basic idea can be extended to any peripheral and any mcu. Here is an example for a mega4809 which takes the above and expands on it. It adds the ability to set a pins properties as arguments in any order, either at creation or by calling an init function later. The options are accumulated and applied when there are no more arguments to process. The compiler ends up doing the work at compile time, and what should appear to produce a lot of code sitting on the mcu ends up being optimized to a few optimal instructions to ultimately do what you wanted.
 
-[more dvanced example for a mega4809](https://godbolt.org/z/67cT1e)
+[more dvanced example for a mega4809](https://godbolt.org/z/Gdsx7G)
+
+See mega4809_Pin.md for explaination.
