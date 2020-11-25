@@ -6,11 +6,11 @@
 **ATMega4809 Pin example**
 [more dvanced example for a mega4809](https://godbolt.org/z/eG314o)
 
-**The above link is an example of something more advanced that builds on the the simple example in the Readme.md file.**
+**The above link is an example of something more advanced that builds on the the simple example in the README.md file.**
 
 **Since the online compiler does not have the ATmega4809 headers available for gcc 9.2.0, gcc 5.4.0 is used. Since 5.4.0 does not have C++17 support, it means the register access references cannot be initialized inside the struct and can look a little ugly to do the init outside of the struct when templates are involved. So the inline var feature is quite nice to have, but functions the same in either case.**
 
-**Some differences and added features (from Readme.md) will be explained here.**
+**Some differences and added features (from README.md) will be explained here.**
 
 ----------
 
