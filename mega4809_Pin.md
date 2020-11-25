@@ -165,7 +165,7 @@ int main(void) {
     }
 }
 ```
-**Here is the init call sequence of the sw Pin instance above. The only code that ends up on the mcu is the final register writes, the rest is done in the compiler at conpiler time.**
+**Here is the init call sequence of the sw Pin instance above. The only code that ends up on the mcu is the final register writes, the rest is done in the compiler at compile time.**
 ```
 init( LOWISON, INPUT, PULLUPON );
 init_( it, LOWISON, {INPUT, PULLUPON} );
