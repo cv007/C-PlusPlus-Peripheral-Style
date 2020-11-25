@@ -44,7 +44,7 @@ using u16 = uint16_t;
 #define SA static auto
 #define SCA static constexpr auto
 ```
-**and in this case, we want a PINS namespace to hold the mcu specific pin information. The namespace is used so we do not pollute the global namespace, and it also can be brought into use with a _using_ statement in addition to the normal methof of access- PINS:: (we need the creation outside the Pin class as these will be used as template arguments)**
+**and in this case, we want a PINS namespace to hold the mcu specific pin information. The namespace is used so we do not pollute the global namespace, and it also can be brought into use with a _using_ statement in addition to the normal method of access- PINS:: (we need the creation outside the Pin class as these will be used as template arguments)**
 ```
 /*---------------------------------------------------------------------
     mcu specific pins
