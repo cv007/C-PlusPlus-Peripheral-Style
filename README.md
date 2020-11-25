@@ -88,7 +88,7 @@ struct Pin {
     SCA pin_            { Pin_%8 };         //0-7
     SCA port_           { Pin_/8 };         //0-n         
 ````
-**The register layout in this case is quite simple. There are 3 registers in use for a pin, and since we only need to access a specific bit we can isolate the 3 bits by using bitfields. Sincew pin_ is a constexpr, it can be used as a value to pad both ends where the named bit will end up in the right location. Since we now have direct bit access, there is no need for a pin bitmask (in this case).**
+**The register layout in this case is quite simple. There are 3 registers in use for a pin, and since we only need to access a specific bit we can isolate the 3 bits by using bitfields. Since pin_ is a constexpr, it can be used as a value to pad both ends where the named bit will end up in the right location. Since we now have direct bit access, there is no need for a pin bitmask (in this case).**
 ```
     struct Reg { 
         u8:pin_; u8 IN :1; u8:7-pin_; 
@@ -98,14 +98,14 @@ struct Pin {
 ```
 **Now we need a way to access the Reg struct above. In C++17 we can use an inline var to do the job. This will also have public access to allow direct use of the Reg struct if needed (in this case since we only have bits, it would be of little use but the Reg struct can be changed to also allow the byte wide register access also).**
 
-**A static inline volatile reference to Reg, with a name of _reg_, and the Reg base address is a port set of registers (starting at PINx in this case).**
+**A static inline volatile reference to Reg, with a name of _reg_, and the Reg base address is a port set of registers (offset starting at PINB in this case).**
 ```
     public:
 
-    //gcc 9.2.0, c++17, use inline reference
+    //gcc 9.2.0, c++17, using static inline reference
     static inline volatile Reg& reg{ *reinterpret_cast<Reg*>(port_*3+(int)&PINB) };
 ```
-**Everything is in place, so can now write some functions. Since we already did the hard work (but was easy), these functions nd up being quite simple. In this case we separate the on/off from high/low since we introduced the INVERT template parameter. At Pin creation is the only time we need to be concerned about what state is considered on and off.**
+**Everything is in place, so can now write some functions. Since we already did the hard work (but was easy), these functions end up being quite simple. In this case we separate the on/off from high/low since we introduced the INVERT template parameter. At Pin creation is the only time we need to be concerned about what state is considered on and off. The if(Inv_) optimizes away ro a single function call which in this case results in a simple sbi or cbi instruction,**
 ```
     SA  high        ()  { reg.OUT = 1; }  
     SA  low         ()  { reg.OUT = 0; } 
@@ -118,7 +118,7 @@ struct Pin {
 
 };
 ```
-**Finally, put the Pin class to use. Create a Pin using the info we want (which pin, and its on state). Now access to any of the class functions are available.**
+**Finally, put the Pin class to use. Create a Pin using the info we want (which pin, and its _on_ state). Now access to any of the class functions are available.**
 ```
 /*---------------------------------------------------------------------
     main
@@ -141,6 +141,6 @@ int main(void) {
 
 ----------
 
-The same idea can be extended to any peripheral and any mcu. Here is an example for a mega4809 which takes the above and expands on it. It adds the ability to set a pins properties as arguments in any order, either as creation or by calling an init function later. The options are accumulated and applied when there are no more argumets to process.
+The same idea can be extended to any peripheral and any mcu. Here is an example for a mega4809 which takes the above and expands on it. It adds the ability to set a pins properties as arguments in any order, either at creation or by calling an init function later. The options are accumulated and applied when there are no more arguments to process.
 
 [more dvanced example for a mega4809](https://godbolt.org/z/67cT1e)
