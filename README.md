@@ -123,6 +123,8 @@ struct Pin {
 /*---------------------------------------------------------------------
     main
 ---------------------------------------------------------------------*/
+using namespace PINS; //so do not have to use PINS::
+
 int main(void) {
 
     Pin<B7, LOWISON> led;
@@ -137,7 +139,7 @@ int main(void) {
 }
 
 ```
-[above code on godbolt.org](https://godbolt.org/z/Y9jM3c)
+[above code on godbolt.org](https://godbolt.org/z/jbexW9)
 
 ----------
 
