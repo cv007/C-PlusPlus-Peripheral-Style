@@ -1,5 +1,3 @@
-# C-PlusPlus-Periplheral-Style
-
 # A Standard C++ Peripheral Style
 
 #### my style, anyway
