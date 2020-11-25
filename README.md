@@ -105,7 +105,7 @@ struct Pin {
     //gcc 9.2.0, c++17, using static inline reference
     static inline volatile Reg& reg{ *reinterpret_cast<Reg*>(port_*3+(int)&PINB) };
 ```
-**Everything is in place, so can now write some functions. Since we already did the hard work (but was easy), these functions end up being quite simple. In this case we separate the on/off from high/low since we introduced the INVERT template parameter. At Pin creation is the only time we need to be concerned about what state is considered on and off. The if(Inv_) optimizes away ro a single function call which in this case results in a simple sbi or cbi instruction,**
+**Everything is in place, so can now write some functions. Since we already did the hard work (but was easy), these functions end up being quite simple. In this case we separate the on/off from high/low since we introduced the INVERT template parameter. At Pin creation is the only time we need to be concerned about what state is considered on and off. The if(Inv_) optimizes away to a single function call which in this case results in a simple sbi or cbi instruction.**
 ```
     SA  high        ()  { reg.OUT = 1; }  
     SA  low         ()  { reg.OUT = 0; } 
