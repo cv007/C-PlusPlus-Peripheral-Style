@@ -14,7 +14,7 @@
 
 ----------
 
-**The PINS::PIN enum is similar, and all the available pins for the mega4809 were not specified for this example, but you get the idea (an mcu speific enum for PINS::PIN).**
+**The PINS::PIN enum is similar, and all the available pins for the mega4809 were not specified for this example, but you get the idea (an mcu specific enum for PINS::PIN).**
 
 **Since this example adds setting pin properties, some other enums in the PINS namespace is added.**
 ```
@@ -34,13 +34,13 @@ namespace PINS {
     enum INITVAL { INITOFF, INITON } ;
 }
 ```
-**Inside the Pin struct, we have some constexpr values. We can get the base address of the PORT and VPORT peripherals from the Pin_ template argument. Since the PORTA peripheral address on every avr0/1 is 0x400 we can simply use that address. The VPORTA also is a known address (0). The offsets for each port is also consitent. The use of the PINS::PIN enum also means there is no need to assert anything, as you are restricted to using the PINS::PIN values at Pin creation.**
+**Inside the Pin struct, we have some constexpr values. We can get the base address of the PORT and VPORT peripherals from the Pin_ template argument. Since the PORTA peripheral address on every avr0/1 is 0x400 we can simply use that address as the base. VPORTA also is a known address (0). The offsets for each port is also consistent. The use of the PINS::PIN enum also means there is no need to assert anything, as you are restricted to using the PINS::PIN values at Pin creation (enums as a type eliminates a lot of asserting in C++).**
 ```
     SCA baseAddrV_ { Pin_/8 * 4 };                  //Vportn base address
     SCA baseAddr_  { Pin_/8 * 0x20 + 0x400 };       //Portn base address
     SCA pin_       { Pin_%8 };                      //0-7
 ```
-**The register structs have changed to allow byte wide register access if wanted, although they are not needed here. Since VPORT can do anything PORT can do at the individual pin level, except for the pin control registers, only the PINnCTRL register is used from the PORT peripheral. The 6 CLR/SET/TGL registers in PORT are only useful when doing those operations on multiple pins at the same time, and is not really a common thing to do (or really even needed in many cases) so is simply left out for this example.**
+**The register structs have changed to allow byte wide register access if wanted, although they are not needed here. Since VPORT can do anything PORT can do at the individual pin level except for the pin control register, only the PINnCTRL register is used from the PORT peripheral. The 6 CLR/SET/TGL registers in PORT are only useful when doing those operations on multiple pins at the same time, and is not really a common thing to do (or really even needed in many cases) so is simply left out for this example. It would be an easy thing to add access to these additional registers if wanted.**
 
 ```
     //register structs
@@ -66,21 +66,21 @@ namespace PINS {
         bool VAL;        //store init value
     };  
 ```
-**Since we do not have C++17 inline variables in gcc 5.4.0 as stated earlier, these register access references can only be declared here, and the init will take place outside the Pin struct.**
+**Since we do not have C++17 inline variables in gcc 5.4.0 as stated earlier, these register access references can only be declared here, and the init will take place outside the Pin struct. You can find the initialization after the Pin struct, and it is not complicated to figure out even though it may look that way.**
 ```
     static volatile Vport&   vport;
     static volatile Pinctrl& pinctrl; 
 ```
 
-**Now the fun (or at least it will be when it comes time to use them).**
+**Now the fun.**
 
-**The init_ functions use templates to both take in a specific set of arguments and allow _any_ additional argumets to be passed on. I'm sure my explanation here will fall short, but will attempt to explain anyway.**
+**The init_ take in a specific set of arguments and allow _any_ additional arguments to be passed on via the use of templates. I'm sure my explanation here will fall short, but will attempt to explain this anyway.**
 
-**Take the first init_ function, it will be 'called' when there is a match from a 'caller' that provides the arguments it has. In this case, it takes an iniT&, a PINS::INITVAL enum value, and 0 or more additional arguments. The compiler will see a 'call' to this type of function (with the correct function name init_, of course), and sees there is a match, so this particluar init_ will be 'called'.**
+**Take the first init_ function, it will be 'called' when there is a match from a 'caller' that provides the arguments it wants. In this case, it takes an iniT&, a PINS::INITVAL enum value, and 0 or more additional arguments. The compiler will see a 'call' to this type of function (with the correct function name init_, of course), and sees there is a match, so this particluar init_ will be 'called'.**
 
-**Now that this function is 'called', it will take the initT& and access the VAL member, setting it to the enum value provided. The initT& is passed around, and in this case it modified something then passed it on to the 'next' init_ adding any additional argumets that came in.**
+**Now that this function is 'called', it will take the initT& and access the VAL member, setting it to the enum value provided. The initT& is passed around, and in this case it modified something in the struct then passed it on to the 'next' init_ with any additional arguments that came in.**
 
-**This cycle repeats until there are no _additional_ argumets. If you look at the last init_ function, you will see it takes only a single argument- the initT& reference. When we end up there, it is time to take the accumulated information in initT and do the register writing. In this case, if any ISC mode is set which is an irq mode, the flag is cleared. The pin control properties are set in a single write, if the direction is output (1) then the pin initial value is also set (normally off- which can mean high or low depending on the pin comtrol invert bit previosuly set), and finally the direction is set.**
+**This cycle repeats until there are no _additional_ arguments. If you look at the last init_ function, you will see it takes only a single argument- the initT& reference. When we end up there (because there was only the single initT& as an argument from a previous init_ call), it is time to take the accumulated information in initT and do the register writing. In this case, if any input mode (ISC) is set which is an irq mode, the flag is cleared. The pin control properties are set in a single write (inven, pullup, and isc), if the direction is output (1) then the pin initial value is also set (normally off- which can mean high or low depending on the pin control invert bit previously set), and finally the pin direction is set.**
 
 **So, what essential happens after starting the init_ 'engine', is we bounce around these init_ functions until no more arguments are left, where it eventually gets to the final init_ where the actual work gets done. The init_ functions second argument has to be unique so the compiler can 'match' function calls to functions. In C++, an enum can be just as unique as any other type and is why this method works.**
 
@@ -126,7 +126,7 @@ SCA init_   (initT& it) {
 ```
 **But how to start the init_ engine? An init function will be used that takes in 0 or more arguments, which is either called by the user, or is called when creating the Pin instance via the constructor.**
 
-**The init function creates an initT struct, which is 0 initalized. The it starts the init_ 'engine' by passing the initT struct as a reference along with an additional argumets.**
+**The init function creates an initT struct, which is 0 initalized. Then it starts the init_ 'engine' by passing the initT struct as a reference along with any additional arguments.**
 
 ```
     //constructors
@@ -146,7 +146,7 @@ SCA init        (Ts... ts) {
                 }
 ```
 
-**So to put the Pin class to use, simply create a Pin and use it. If the Pin creation is in global space AND you provide init options, then you will get the pin setup via the global constructors called in early startup code. If you would rather init any pin when and where you want, just provide the instance name only and call init when you want.**
+**So to put the Pin class to use, simply create a Pin and use it. If the Pin creation is in global space AND you provide init options, then you will get the pin setup via the global constructors list called in early startup code. If you would rather init a pin when and where you want, just provide the instance name only and call the init function when you want.**
 ```
 using namespace PINS;
 /*---------------------------------------------------------------------
@@ -165,4 +165,11 @@ int main(void) {
     }
 }
 ```
-
+**Here is the init call sequence of the sw Pin instance above. The only code that ends up on the mcu is the final register writes, the rest is done in the compiler at conpiler time.**
+```
+init( LOWISON, INPUT, PULLUPON );
+init_( it, LOWISON, {INPUT, PULLUPON} );
+init_( it, INPUT, {PULLUPON} );
+init_( it, PULLUPON );
+init_( it ); //done, now write registers
+```
