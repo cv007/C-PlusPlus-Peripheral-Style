@@ -4,7 +4,7 @@
 ----------
 
 **ATMega4809 Pin example**
-[more dvanced example for a mega4809](https://godbolt.org/z/36fM3c)
+[more advanced example for a mega4809](https://godbolt.org/z/36fM3c)
 
 **The above link is an example of something more advanced that builds on the simple example in the README.md file.**
 
