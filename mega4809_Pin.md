@@ -4,7 +4,7 @@
 ----------
 
 **ATMega4809 Pin example**
-[more dvanced example for a mega4809](https://godbolt.org/z/7dPrYd)
+[more dvanced example for a mega4809](https://godbolt.org/z/36fM3c)
 
 **The above link is an example of something more advanced that builds on the the simple example in the README.md file.**
 
@@ -14,7 +14,7 @@
 
 ----------
 
-**The PINS::PIN enum is similar, and all the available pins for the mega4809 were not specified for this example, but you get the idea (an mcu specific enum for PINS::PIN).**
+**The PINS::PIN enum is the same as before, but all the available pins for the mega4809 were specified in this example.**
 
 **Since this example adds setting pin properties, some other enums in the PINS namespace is added.**
 ```
@@ -155,7 +155,7 @@ using namespace PINS;
 int main(void) {
 
     Pin<A0> sw { LOWISON, INPUT, PULLUPON }; //options in any order
-    Pin<B7> led{ OUTPUT, LOWISON };
+    Pin<B2> led{ OUTPUT, LOWISON };
    
     while( sw.isOff() ); //press sw to start
 
