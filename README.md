@@ -12,21 +12,27 @@
 template<...something...>
 struct Name { //struct defaults to public access, class can also be used if wanted
 
-    public:
-    //named enums needed to use this peripheral
+    public: //if using class instead of struct
+    named enums needed to use this peripheral (frequently viewed)
 
     private:
-    //constants (static constexpr)
-    //register struct
+    constants (static constexpr)
+    register struct (or just its declaration)
 
     public:
-    //register struct access var, publicly available
+    register struct access var, publicly available
+    
+    private:
+    any private functions, vars
+    
+    public:
+    constructor(s)
+    init function(s)
 
-    //constructor(s)
-    //init function
-
-    //all other functions
-    //all functions static
+    all other functions
+    all functions static
+    
+    register struct (if only defined earlier, so we can keep it out of the way)
 };
 ```
 ----------
