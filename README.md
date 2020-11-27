@@ -20,7 +20,7 @@ struct Name { //struct defaults to public access, class can also be used if want
     register struct (or just its declaration)
 
     public:
-    register struct access var, publicly available
+    register struct access var
     
     private:
     any private functions, vars
