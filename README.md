@@ -4,6 +4,8 @@
 ----------
 #### The purpose here is a show a simple C++ style which can be used for any mcu and any peripheral. It will be assumed C++17 features are available.
 
+[code on godbolt.org](https://godbolt.org/z/jbexW9)
+
 #### A general outline of the peripheral class-
 
 ```
@@ -141,8 +143,6 @@ int main(void) {
 }
 
 ```
-[above code on godbolt.org](https://godbolt.org/z/jbexW9)
 
-----------
 
 This same basic idea can be extended to any peripheral and any mcu. See the mega4809 examples for more advanced use.
