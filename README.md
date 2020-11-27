@@ -44,7 +44,7 @@ using u16 = uint16_t;
 #define SA static auto
 #define SCA static constexpr auto
 ```
-**and in this case, we want a PINS namespace to hold the mcu specific pin information. The namespace is used so we do not pollute the global namespace, and it also can be brought into use with a _using_ statement in addition to the normal method of access- PINS:: (we need the creation outside the Pin class as these will be used as template arguments)**
+**and in this case, we want a PINS namespace to hold the mcu specific pin information. The namespace is used so we do not pollute the global namespace, and it also can be brought into use with a _using_ statement in addition to the normal method of access- PINS:: (we need the creation outside the Pin class as these will be used as template arguments). The PIN values are 0 based, and each port letter starts at the offset of previousPort+8. This means the lowest 3 bits contain the pin number (0-7) and the other bits store the port letter (0=B, 1=C, 2=D). So, in effect 0bPPPPPnnn, where PPPPP is the port (0 to max ports-1, which is 2 in this case), and NNN is the pin number. If the mcu happens to have a max of 16 or 32 pins per port, then the nnn and PPPPP gets adjusted to match.**
 ```
 /*---------------------------------------------------------------------
     mcu specific pins
@@ -58,7 +58,7 @@ namespace PINS {
     };
 }
 ```
-**and also in the same PINS namespace, other enums that are either used as a template argument, or would be nice to be able to bring in simply with the _using_ statement**
+**Also in the same PINS namespace, other enums are created that are either will be used as a template argument to the Pin struct, or would be nice to be able to bring in simply with the _using_ statement when using the Pin struct (such as setting pin properties), and of course are related to all the other things in the PINS namespace. This example is minimal, and the only needed enum is for the invert template argument.**
 ```
 /*---------------------------------------------------------------------
     generic Pin enums
@@ -66,29 +66,31 @@ namespace PINS {
 namespace PINS {
     enum INVERT { HIGHISON, LOWISON };
     //normaly more enums here- like
-    //enum IOMODE { IMNPUT, OUTPUT };
+    //enum IOMODE { INPUT, OUTPUT };
     //etc.
 }
 ```
 **With the above in place, a Pin class can be started. In this case the template will be setup to accept the PINS::PIN argument, and whether an inverted state is wanted (on=high=HIGHISON, or on=low=LOWISON).**
 
-**This avr has no invert mode (like an avr0/1), so we need to keep track of the invert via the Pin type (its templates). The template information travels everywhere the Pin instance goes (it is now a specific type), which is how the compiler can know all about the Pin instance, and none of that information needs to be stored on the mcu.**
+**This avr, like most mcu's, has no invert mode (an avr0/1 is an exception), so we need to keep track of the invert via the Pin type (its templates). The template information travels everywhere the Pin instance goes (it is now a specific type), which is how the compiler can always know all about the Pin instance, and none of that information needs to be stored on the mcu.**
 ```
 /*---------------------------------------------------------------------
     Pin (pin specific)
 ---------------------------------------------------------------------*/
 template<PINS::PIN Pin_, PINS::INVERT Inv_ = PINS::HIGHISON>
 struct Pin {
-    private:
 ```
-**Since the PINS namespace will hold the needed enums, there are no public enums in this case.**
+**Since the PINS namespace will hold the needed enums, there are no public enums created in this case, but would normally go here (public). The top of the struct is a good place for these, since looking up the available enum options is done frequently.**
 
-**We can now create constants to make usage easier. Using constexpr is no cost so use when wanted. Here we calculate the pin number and port number from the Pin_ template argument.**
+**We can now create constants to make usage easier. Here we calculate the pin number and port number from the Pin_ template argument, and can now use those values instead of having the division/remainder calculations show up in our functions. The compiler can figure it all out at compile time, so there is no cost to using them.**
 ```
+    private:
     SCA pin_            { Pin_%8 };         //0-7
     SCA port_           { Pin_/8 };         //0-n         
 ````
-**The register layout in this case is quite simple. There are 3 registers in use for a pin, and since we only need to access a specific bit we can isolate the 3 bits by using bitfields. Since pin_ is a constexpr, it can be used as a value to pad both ends where the named bit will end up in the right location. Since we now have direct bit access, there is no need for a pin bitmask (in this case).**
+**The register layout in this case is quite simple. There are 3 registers in use for a pin (port), and since we only need to access a specific bit we can isolate the 3 bits by using bitfields. Since pin_ is a constexpr, it can be used as a value to pad both ends of the bitfield where the named bit will end up in the right location. A 0 sized bitfield is valid, and signifies an alignement which in this case is 8bits, so if we end up with 0 on either end it is ok. Since we now have direct bit access, there is no need for a pin bitmask (in this case because of the avr instruction set, but a pinmask is most likely needed on other mcu's to use the set/clr/tog/flags type registers in an atomic way).**
+
+**Normally, the register struct of most peripherals will have a register layout containing union/struct so the byte (or word) sized register can be accessed, along with bits or bit ranges by name within them. Usually, it is better to just declare the register struct here, then create it at the end of the struct so it stays out of the way.**
 ```
     struct Reg { 
         u8:pin_; u8 IN :1; u8:7-pin_; 
@@ -96,7 +98,7 @@ struct Pin {
         u8:pin_; u8 OUT:1; u8:7-pin_;
     };
 ```
-**Now we need a way to access the Reg struct above. In C++17 we can use an inline var to do the job. This will also have public access to allow direct use of the Reg struct if needed (in this case since we only have bits, it would be of little use but the Reg struct can be changed to also allow the byte wide register access also).**
+**Now we need a way to access the Reg struct above. In C++17 we can use an inline var to do the job. This will also be public to allow direct use of the Reg struct if needed (in this case since we only have bits, it would be of little use but the Reg struct could be changed to also allow the byte wide register access also). If C++17 is not available, then check out the mega4809 md files in this github folder which end up with only a declaration in the struct, and needing to define the var outside the struct.**
 
 **A static inline reference to a volatile Reg, with a name of _reg_, and the Reg address is an offset from what would be considered the base of all the ports, PINB in this case (each port uses 3 registers, all port registers are consecutive). The reference as a static inline variable effectively becomes something similar to a constexpr, where its use requires no storage on the mcu. The use of PINB to get the base address means we have to include _io.h_, but there is no reason the base address cannot be obtained in any other way- such as just using the known base address or creating a base address in a mcu specific header.**
 ```
@@ -143,8 +145,4 @@ int main(void) {
 
 ----------
 
-This same basic idea can be extended to any peripheral and any mcu. Here is an example for a mega4809 which takes the above and expands on it. It adds the ability to set a pins properties as arguments in any order, either at creation or by calling an init function later. The options are accumulated and applied when there are no more arguments to process. The compiler ends up doing the work at compile time, and what should appear to produce a lot of code sitting on the mcu ends up being optimized to a few optimal instructions to ultimately do what you wanted.
-
-[more dvanced example for a mega4809](https://godbolt.org/z/36fM3c)
-
-See mega4809_Pin.md for explaination.
+This same basic idea can be extended to any peripheral and any mcu. See the mega4809 examples for more advanced use.
