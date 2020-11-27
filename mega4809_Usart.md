@@ -12,13 +12,13 @@
 
 **Since we are creating class templates and also creating static functions, the class we end up with does not result in reused code for each instance, rather we end up with a class that needs to be written only once. A peripheral's functions are typically quite simple, so there is really no downside to the result of having each instance creating its own code and the compiler is good at determining what is optimal in any case.**
 
-**We first need a way to tell out Usart class about those differences mentioned earlier. This will not end up being complete, and there are other ways to do similar things, but the following example given will work for now.**
+**We first need a way to tell our Usart class about those differences mentioned earlier. This will not end up being complete, and there are other ways to do similar things, but the following example given will work for now.**
 
-**A struct makes a good container, so will use a struct to contain usart instance specific information which we will pass along as a template argument to the Usart class.**
+**A struct makes a good container, so a struct will be used to contain usart instance specific information which we will pass along as a template argument to the Usart class.**
 
-**The template arguments for this instance class will take in the usart number 0-3 (which we can static_assert), the tx and rx pins from our previously created PINS::PIN enum (already limited, so no asser needed), and whether we want to use the alternate pin set. We can store everything as static constexpr auto (auto works for most things), which is always ideal until the compiler is unhappy about its use.**
+**The template arguments for this instance class will take in the usart number 0-3 (which is static_assert at compile time), the tx and rx pins from our previously created PINS::PIN enum (already limited, so no assert needed), and whether we want to use the alternate pin set. We can store everything as static constexpr auto (auto works for most things), which is always ideal until the compiler is unhappy about its use (it will tell you when its not happy, of course).**
 
-**The functions set the portmux value, and init the tx and rx pins. Although storing the Rx_ and Tx_ values seems unnecessary as the Rx_ and Tx_ template values could be used directly in the pin functions, this will allow the usart class to access the pin directly if needed. The portmux code is not pretty here but I didn't want to create/show another peripheral (Portmux) so I just manipulate the single register needed in this case, and is why the N_ also works well here (to get to the right pair of bits in the portmux register for the usart we are interested in).**
+**The functions set the portmux value, and init the tx and rx pins. Although storing the Rx_ and Tx_ values seems unnecessary as the Rx_ and Tx_ template values could be used directly in the pin functions, this will allow the usart class to access a pin directly if needed. The portmux code is not pretty here but I didn't want to create another peripheral (Portmux) so I just manipulate the single register needed in this case (all avr0 mega's the same), and is why the N_ also works well here (to get to the right pair of bits in the portmux register for the usart we are interested in).**
 
 ```
 /*------------------------------------------------------------------------------
@@ -43,7 +43,9 @@ struct USART_INST {
 
 };
 ```
-**Now we have what we need to create all the Usart instances. First we have to declare the Usart struct and what it will look like (template). Then we simply create a 'using' name for each (like typedef) providing the information unique to each instance. We no longer have to concern ourselves about the details of Usart0, as we can now just use Usart0, or any of the variations.**
+**Now we have what we need to create all the Usart instances. First we have to declare the Usart struct and what it will look like (a template with a typename parameter). Then we simply create a 'using' name for each (like typedef) providing the information unique to each instance. We no longer have to concern ourselves about the details that make up Usart0, as we can now just use Usart0, or any of the others. So with this little amount of code, we have 8 different Usart variations and all we are left to do is choose which one to use.** 
+
+**There is nothing special about the names, and if you wanted to call Usart0 UsartA01 or Usart0alt UsartA45 to give an indication which pins are involved, you could also do that instead (probably makes more sense as the name is meaningless after the instance is created, and we are moslty interested in the pins used and not the usart numbers).**
 
 ```
 template<typename> struct Usart;
@@ -57,9 +59,9 @@ using Usart3    = Usart< USART_INST<3,PINS::B0,PINS::B1,0> >;
 using Usart3alt = Usart< USART_INST<3,PINS::B4,PINS::B5,1> >;
 ```
 
-**The Usart class come next. There is not that much different than what has already been covered previously. You can see that the template argument takes in the instance specific information we created above. To access anything in that Inst_, you simply access direclty via Inst_:: which should look normal if you are familiar with C++.**
+**The Usart class comes next. There is not that much different than what has already been covered previously. You can see that the template argument takes in the instance specific information we created above. To access anything in that Inst_, you simply access direclty via Inst_:: which should look normal if you are familiar with C++.**
 
-**You can see the addition of public enums in this case, which are Usart specific enums used for function argumemts. Also, we will create our own complete peripheral register struct in this case, and simply declaring it up top and creating it later means we can park it below all the other code and do not have to stumble over it every time we want to look at the parts of the class that need looking at.**
+**You can see the addition of public enums in this case, which are Usart specific enums used for function argumemts. Also, we will create our own complete peripheral register struct in this case, and simply declaring it up top and creating it later means we can park it below all the other code and do not have to stumble over it every time we want to look at the parts of the code that need looking at.**
 
 **The Usart class is stripped down for this example, but it will function and when turned on it will take care of the pins and portmux, and be ready to go for simple usage.**
 ```
@@ -101,3 +103,5 @@ int main(void) {
     }
 }
 ```
+
+**This is obviously an incomplete Usart class, but everything else to make it complete is just more of the same. You can end up with an interrupt driven usart that can use optionally use buffers (another class), can handle all the various modes, can hook into the things in stdio.h, and so on.**
