@@ -39,11 +39,10 @@ struct Name { //struct defaults to public access, class can also be used if want
 **I will start with a simple example creating a Pin class for a ATmega328p, and you will see that the outline above is only a _general_ outline, which changes as required. The example is incomplete, but still works.**
 
 
-**first, some headers**
+**first, we will be using just a single item from the mcu header (PINB) so will include io.h**
 ```
 #include <avr/io.h> //we will use existing info for now
-#include <stdint.h>
-#include <stdbool.h>
+...
 ```
 **some types and defines to reduce typing**
 ```
