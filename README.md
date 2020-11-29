@@ -65,7 +65,7 @@ namespace PINS {
     };
 }
 ```
-**Also in the same PINS namespace, other enums are created that are either will be used as a template argument to the Pin struct, or would be nice to be able to bring in simply with the _using_ statement when using the Pin struct (such as setting pin properties), and of course are related to all the other things in the PINS namespace. This example is minimal, and the only needed enum is for the invert template argument.**
+**Also in the same PINS namespace, other enums are created that are either used as a template argument to the Pin struct, or would be nice to be able to bring in simply with the _using_ statement when using the Pin struct (such as setting pin properties), and of course are related to all the other things in the PINS namespace. This example is minimal, and the only needed enum is for the invert template argument.**
 ```
 /*---------------------------------------------------------------------
     generic Pin enums
