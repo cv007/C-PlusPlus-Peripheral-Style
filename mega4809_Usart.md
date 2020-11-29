@@ -104,4 +104,4 @@ int main(void) {
 }
 ```
 
-**This is obviously an incomplete Usart class, but everything else to make it complete is just more of the same. You can end up with an interrupt driven usart that can use optionally use buffers (another class), can handle all the various modes, can hook into the things in stdio.h, and so on.**
+**This is obviously an incomplete Usart class, but everything else to make it complete is just more of the same. You can end up with an interrupt driven usart that can optionally use buffers (another class), can handle all the various modes, can hook into the things in stdio.h, and so on.**
