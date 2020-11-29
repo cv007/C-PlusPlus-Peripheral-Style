@@ -36,12 +36,12 @@ struct Name { //struct defaults to public access, class can also be used if want
 };
 ```
 ----------
-**I will start with a simple example creating a Pin class for a ATmega328p, and you will see that the outline above is only a _general_ outline, which changes as required. The example is incomplete, but still works.**
+**I will start with a simple example creating a Pin class for a ATmega328p, and you will see that the outline above is only a _general_ outline, which changes as required. The example is incomplete, but still works. The terms _struct_ and _class_ are interchangable so I may use one or the other term that is describing the same thing, sometimes _class_ sounds/writes better so may end up writing _class_ when referring to a _struct_ or vice-versa.**
 
 
-**first, we will be using just a single item from the mcu header (PINB) so will include io.h**
+**first, we will be using just a single item from the mcu header (PINB) so will include io.h, although a manufacturer header is not necessarily required as you may end up with your own peripheral register layout as a struct inside the peripheral class**
 ```
-#include <avr/io.h> //we will use existing info for now
+#include <avr/io.h>
 ...
 ```
 **some types and defines to reduce typing**
