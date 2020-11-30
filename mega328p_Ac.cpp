@@ -1,4 +1,4 @@
-// you are here - https://godbolt.org/z/6h7Pqdf
+// you are here - https://godbolt.org/z/fnhM69
 #include <stdint.h>
 #include <stdbool.h>
 #include <avr/io.h>
@@ -71,11 +71,15 @@ SA  on          (AINNEG n, AINPOS p) {
                     on();
                 }
 
-SA  on          (AINNEG n, AINPOS p, IRQMODE m) {
+                //defaults to turning on global irq's, unless you
+                //do not want, then you have to provide the final
+                //argument of false
+SA  on          (AINNEG n, AINPOS p, IRQMODE m, bool sei = true) {
                     on( n, p );
                     irqMode( m );
                     clearFlag();
                     irqOn();
+                    if( sei ) sei();
                 }                
 
 //===========
@@ -131,10 +135,6 @@ int main(void) {
     Ac ac;
     ac.on( ac.ADC0, ac.AIN0, ac.FALLING );
 
-    sei();
-
     while(true){}
 
 }
-
-
