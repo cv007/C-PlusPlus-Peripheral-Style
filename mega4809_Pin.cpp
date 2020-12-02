@@ -185,7 +185,7 @@ SA  invertOff   ()  { pinctrl.INVEN = 0; }
 SA  pullupOn    ()  { pinctrl.PULLUP = 1; }
 SA  pullupOff   ()  { pinctrl.PULLUP = 0; }
 SA  inMode      (PINS::ISCMODE e) {
-                    pinctrl->PINCTRL.ISC = e;
+                    pinctrl.PINCTRL.ISC = e;
                 }
 
     //irq flags
