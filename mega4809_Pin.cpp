@@ -1,5 +1,5 @@
-// https://godbolt.org/z/KGo5WW
 /*---------------------------------------------------------------------
+https://godbolt.org/z/3anT8G
     simple c++ example
     (online compiler cannot use >gcc5.4.0 with a mega4809 as headers
      only available in 5.4.0, so cannot use c++17 features such as
@@ -180,13 +180,11 @@ SA  ioMode      (PINS::IOMODE e) {
 
     //pinctrl properties
 
-SA  invertOn    ()  { pinctrl.INVEN = 1; }
-SA  invertOff   ()  { pinctrl.INVEN = 0; }
-SA  pullupOn    ()  { pinctrl.PULLUP = 1; }
-SA  pullupOff   ()  { pinctrl.PULLUP = 0; }
-SA  inMode      (PINS::ISCMODE e) {
-                    pinctrl.PINCTRL.ISC = e;
-                }
+SA  invertOn    ()                  { pinctrl.INVEN = 1; }
+SA  invertOff   ()                  { pinctrl.INVEN = 0; }
+SA  pullupOn    ()                  { pinctrl.PULLUP = 1; }
+SA  pullupOff   ()                  { pinctrl.PULLUP = 0; }
+SA  inMode      (PINS::ISCMODE e)   { pinctrl.ISC = e; }
 
     //irq flags
 
@@ -231,7 +229,7 @@ int main(void) {
 
     Pin<A0> sw { LOWISON, INPUT, PULLUPON }; //options in any order
     Pin<B2> led{ OUTPUT, LOWISON };
-   
+
     while( sw.isOff() ); //press sw to start
 
     while(true){
