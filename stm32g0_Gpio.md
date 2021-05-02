@@ -34,7 +34,7 @@ PIN             {
 ```
 **The Gpio.hpp header starts off with the normal pragma once and an include that has common things needed by all files- some typdef's for things like u8,u32,etc, and an mcu specific include such as stm32g031k8.hpp which has our PIN enum (and also has PeripheralAddresses for this mcu).**
 
-**We also have an additions to the PINS namespace to add Gpio properties in the form of enums.**
+**We also have an addition to the PINS namespace to add Gpio properties in the form of enums. Since in the same namespace as PIN, we can bring in the PINS namespace and also get these enums so we have all PINS enums at our disposal without having to use PINS:: all the time. The downside is potential name collision, but these are probably going to be used more often so 'un-collide' the others into their own space.**
 
 ```
 //Gpio.hpp
