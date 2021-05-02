@@ -7,6 +7,8 @@
 
 **The original README.md should be read along with mega4809_Pin.md to get a background on where we came from, although we will not be using templates in this version.**
 
+**The NUCLEO32_G031K8 repository will show a completed example of using what is described below.**
+
 ----------
 
 **The PINS::PIN enum is the same as described before, and the pins listed here are for an stm32g031k8 and would be created in an mcu specific header like _stm32g031k8.hpp_.**
