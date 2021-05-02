@@ -1,6 +1,7 @@
 # A Standard C++ Peripheral Style
 
 #### my style, anyway
+#### This file describes a mega328, the mega4809.md will decribe the same showing chnages needed from this description.
 ----------
 #### The purpose here is a show a simple C++ style which can be used for any mcu and any peripheral. It will be assumed C++17 features are available.
 
