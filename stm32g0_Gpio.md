@@ -224,17 +224,6 @@ deinit          ()
                 return *this;
                 }
 ```
-**Probably not many uses for this, but if you have a pin instance and need to get its port/pin/pinmask for some reason, these will return what you want. It may be there is no use for this, but I have used it before although that was with an nRF52 which can use any pin for digital peripherals. If not used, there is no cost.**
-```
-                //get info for a GpioPin instance
-                //(like a reverse lookup if you only have the name)
-                II auto
-port            () { return port_; }
-                II auto
-pin             () { return pin_; }
-                II auto
-pinmask         () { return pinmask_; }
-```
 **We finally get to the main purpose of this class which is to read and manipulate the pins. The reads are broken into two functions, one to get the pin value and the other to get the output value. The output value will be used later for toggle.**
 ```
                 //read
