@@ -32,7 +32,7 @@ PIN             {
 
 }
 ```
-**The Gpio.hpp header starts off with the normal pragma once and an include that has common things needed by all files- some typdef's for things like u8,u32,etc, and an mcu sepcific include such as stm32g031k8.hpp which has our PIN enum (and also has PeripheralAddresses for this mcu).**
+**The Gpio.hpp header starts off with the normal pragma once and an include that has common things needed by all files- some typdef's for things like u8,u32,etc, and an mcu specific include such as stm32g031k8.hpp which has our PIN enum (and also has PeripheralAddresses for this mcu).**
 
 **We also have an additions to the PINS namespace to add Gpio properties in the form of enums.**
 
@@ -128,7 +128,7 @@ lock            (u16 bm)
 =============================================================*/
 struct GpioPin : GpioPort {
 ```
-**Some private vars are needed to keep track of what pin we are on (0-15), our pinmask value for manipulating the atomic set/reset registers, and an invert bool so we can use on/off after initially decalring what those mean via the INVERT enum (default is HIGHISON).**
+**Some private vars are needed to keep track of what pin we are on (0-15), our pinmask value for manipulating the atomic set/reset registers, and an invert bool so we can use on/off after initially declaring what those mean via the INVERT enum (default is HIGHISON).**
 
 **These vars need storage for each instance, but if an instance is created in a local scope there will be no storage needed as the compiler will have no need to globally store the info.**
 ```
@@ -140,7 +140,7 @@ struct GpioPin : GpioPort {
                 u16 pinmask_;   //for bsr/bsrr
                 bool invert_;   //so can do on/off
 ```
-**The constructor takes in a PIN enum, the INVERT state which defaults to HIGHISON, and a bool to indicate whether its clock enable (in Rcc, for the port) needs to be set and is true by default. The latter allows using the class in a local scope without having to enable the port clock when you already know it is enabled. The constructor sets the private vars described previously according to the values passed in, and also provides GpioPort with the info ot needs.**
+**The constructor takes in a PIN enum, the INVERT state which defaults to HIGHISON, and a bool to indicate whether its clock enable (in Rcc, for the port) needs to be set and is true by default. The latter allows using the class in a local scope without having to enable the port clock when you already know it is enabled. The constructor sets the private vars described previously according to the values passed in, and also provides GpioPort with the info it needs.**
 ```
 //-------------|
     public:
@@ -156,7 +156,7 @@ GpioPin         (PINS::PIN pin, PINS::INVERT inv = PINS::HIGHISON, bool clken = 
 ```
 **Pin properties are set with the following functions. It can be seen that pin_ is used to find the bit or set of bits needed to set the property in a register. It would be nicer if these properties were in pin specific registers, but we deal with what they provide us.**
 
-**Also note that we return a reference to this class so we can method chain which is handy to have in this case. Templates and parameter packs can also be used as shown in mega4809_Pin.cpp init_ functions, but in this case its not worth the trouble as we are now dealing with seperate registers for each property and method chainng can do the same thing, easier. If there was a single property register for each pin, then templates would be good as you could 'accumulate' all the wanted properties in a single argument list and then set the single register to the reuired value, all at compile time.**
+**Also note that we return a reference to this class so we can method chain which is handy to have in this case. Templates and parameter packs can also be used as shown in mega4809_Pin.cpp init_ functions, but in this case its not worth the trouble as we are now dealing with seperate registers for each property and method chaining can do the same thing, easier. If there was a single property register for each pin, then templates would be good as you could 'accumulate' all the wanted properties in a single argument list and then set the single register to the required value in a single write, where the value is calculate at compile time.**
 ```
                 //properities
                 II GpioPin&
@@ -204,7 +204,7 @@ altFunc         (PINS::ALTFUNC e)
                 II GpioPin&
 lock            () { GpioPort::lock(pinmask_); return *this; }
 ```
-**If a pin needs to get back to default state, this will do it. Notice we will also detect if we are an SWD pin and set accordingly. Also method chaining can be seen in use here, although the same can be done without.**
+**If a pin needs to get back to its default state, deinit will do it. Notice we will also detect if we are an SWD pin and set accordingly. Also method chaining can be seen in use here, although the same can be done without.**
 ```
                 //back to reset state- if reconfuring pin from an unknown state
                 II GpioPin&
@@ -224,7 +224,7 @@ deinit          ()
                 return *this;
                 }
 ```
-**Probably not many uses for this, but if you have a pin instance and need to get its port/pin/pinmask for some reason, these will return what you want.**
+**Probably not many uses for this, but if you have a pin instance and need to get its port/pin/pinmask for some reason, these will return what you want. It may be there is no use for this, but I have used it before although that was with an nRF52 which can use any pin for digital peripherals. If not used, there is no cost.**
 ```
                 //get info for a GpioPin instance
                 //(like a reverse lookup if you only have the name)
@@ -235,7 +235,7 @@ pin             () { return pin_; }
                 II auto
 pinmask         () { return pinmask_; }
 ```
-**We finally get to the main purpose of this class which is to manipulate the pins.The reads are broken into two functions, one to get the pin value and the other to get the output value. The output value will be used later for toggle.**
+**We finally get to the main purpose of this class which is to read and manipulate the pins. The reads are broken into two functions, one to get the pin value and the other to get the output value. The output value will be used later for toggle.**
 ```
                 //read
                 II auto
@@ -243,7 +243,7 @@ pinVal          () { return reg_.IDR bitand pinmask_; }
                 II auto
 latVal          () { return reg_.ODR bitand pinmask_; }
 ```
-**The pin state functions all use the pinVal() function, and the on/off version take into account the invert value. Notice we only refer to the above two functions.**
+**The pin state functions all use the pinVal() function above, and the on/off versions take into account the invert value. Notice we only refer to the above two functions.**
 ```
                 II auto
 isHigh          () { return pinVal(); }
@@ -254,7 +254,7 @@ isOn            () { return ( invert_ == PINS::LOWISON ) ? isLow() : isHigh(); }
                 II auto
 isOff           () { return not isOn(); }
 ```
-**The two write functions use the pinmask_ var to set/reset a pin output atomically.**
+**The two base write functions use the pinmask_ var to set/reset a pin output atomically. We label these high/low because that is what we are doing here.**
 ```
                 //write
                 II GpioPin&
@@ -262,7 +262,7 @@ high            () { reg_.BSRsR = pinmask_; return *this; }
                 II GpioPin&
 low             () { reg_.BRR = pinmask_; return *this; }
 ```
-**Now we can make some more write functions based off the two above functions.**
+**Now we can make some more write functions based off the two above functions. The on/off functions take into account the invert_ value, where the toggle function uses the latVal function to determine which state to set. The on function is overloaded so you can pass a bool to it and get either on/off, which is nicer to use as it avoids the need to create an if/else in your code.**
 ```
                 II GpioPin&
 on              () { invert_ == PINS::LOWISON ? low() : high(); return *this; }
@@ -278,4 +278,4 @@ pulse           () { toggle(); toggle(); return *this; }
 };
 ```
 
-**Done. We now have a way to deal with pins, and if you look at the NUCLEO32_G031K8 project, it can be seen in use in multiple ways including the setting up of pins in the Uart class.**
+**Done. We now have a way to deal with pins, and if you look at the NUCLEO32_G031K8 project it can be seen in use in multiple ways including the setting up of pins in the Uart class. That project also shows how this would get put into a Gpio.hpp header and can be used for multiple stm32 mcu's.**
