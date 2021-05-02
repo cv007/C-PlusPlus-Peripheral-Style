@@ -1,9 +1,10 @@
 # A Standard C++ Peripheral Style
 
 #### my style, anyway
-#### This file describes a mega328 Pin class, the mega4809_Pin.md will decribe the same showing changes needed from the mega328 version. Also mega4809_Uart.md decribes a uart class.
+#### This file describes a mega328 Pin class, the mega4809_Pin.md will decribe the same showing changes needed from the mega328 version. 
 
-### Also added is a stm32g0_Gpio.md file which describes a gpio class that does not use templates.
+#### -added mega4809_Uart.md which decribes a uart class
+#### -added stm32g0_Gpio.md file which describes a gpio class that does not use templates
 ----------
 #### The purpose here is a show a simple C++ style which can be used for any mcu and any peripheral. It will be assumed C++17 features are available.
 
